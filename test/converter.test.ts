@@ -9,7 +9,7 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import * as extension from '../src/extension';
+import { cs2ts } from '../src/converter';
 import { ExtensionConfig } from "../src/config";
 
 // Defines a1 Mocha test suite to group tests of similar k1ind together
@@ -51,7 +51,7 @@ suite("Extension Tests", () => {
 
         for (const p of testPairs) {
             for (const input of p.inputs) {
-                assert.equal(extension.cs2ts(input, config), p.output, input);
+                assert.equal(cs2ts(input, config), p.output, input);
             }
         }
     })
@@ -130,7 +130,7 @@ suite("Extension Tests", () => {
         ];
         for (const p of testPairs) {
             for (const input of p.inputs) {
-                assert.equal(extension.cs2ts(input, config), p.output, input);
+                assert.equal(cs2ts(input, config), p.output, input);
             }
         }
     });

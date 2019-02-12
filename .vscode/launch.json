@@ -6,7 +6,13 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}/out/src/commentDoc.js"
+            "program": "${workspaceRoot}/out/src/index.js",
+            "args": [
+                "convert",
+                "-n",
+                "/Users/greg_murray/projects/v2/store-api-monorepo/store-api/Source/DomainModels/Cart/CartItemProduct.cs",
+                "-V"
+            ]
         },
         {
             "name": "Launch Extension",

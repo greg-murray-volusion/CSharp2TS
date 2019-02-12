@@ -40,7 +40,7 @@ export function generateMethod(value: CSharpMethod, config: ExtensionConfig): st
     const lambdaBody = (value.name + ": " + (value.async ? "async " : "")) + fullType;
 
     return (
-        config.methodStyle == "signature" ? (value.name + fullType + ";") :
+        config.methodStyle == "signature" ? `${value.modifier}${value.name}${fullType} ${value.body}` :
             config.methodStyle == "lambda" ? lambdaBody + " => { throw new Error('TODO'); }, " :
                 config.methodStyle == "controller" ? lambdaBody + generateControllerBody(value.name, value.parameters)
                     : config.methodStyle
@@ -49,7 +49,7 @@ export function generateMethod(value: CSharpMethod, config: ExtensionConfig): st
 
 export function generateConstructor(value: CSharpConstructor, config: ExtensionConfig): string {
     const paramList = value.parameters.map(x => generateParam(x, config)).join(", ");
-    return config.removeConstructors ? "" : ("new(" + paramList + "): " + value.name + ";");
+    return config.removeConstructors ? "" : ("constructor(" + paramList + ") " + value.body);
 }
 
 const myClass = {
@@ -89,9 +89,10 @@ export function generateClass(x: CSharpClass, config: ExtensionConfig): string {
     const name = x.name;
     const modifier = (x.isPublic ? "export " : "");
     const keyword = config.classToInterface ? "interface" : "class";
+    const extendsOrImplements = config.classToInterface ? "extends": "implements";
     const prefix = `${modifier}${keyword} ${name}`;
     if (inheritsTypes.length > 0) {
-        return `${prefix} extends ${inheritsTypes.join(", ")}`;
+        return `${prefix} ${extendsOrImplements} ${inheritsTypes.join(", ")} `;
     } else {
         return prefix;
     }

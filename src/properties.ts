@@ -41,7 +41,8 @@ export function parseProperty(code: string): ParseResult<CSharpProperty> | null 
         const set = seq(getSetModifier, spaceOptional, /set\s*;/);
         const initializer = optional(seq(spaceOptional, /=/, spaceOptional, cap(/.*/), /;/));
         const getSet = seq(/{/, spaceOptional, get, spaceOptional, optional(set), spaceOptional, /}/, initializer);
-        const fatArrow = /=>.*;/;
+        // const fatArrow = /=>.*;/;
+        const fatArrow = /XXXXXXX/;
         const getSetOrFatArrow = any(getSet, fatArrow);
         return getSetOrFatArrow;
     })();
