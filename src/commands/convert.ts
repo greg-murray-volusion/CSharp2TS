@@ -64,8 +64,14 @@ export const convertFile = (csFileName: string): void => {
                         .replace(/\/\*\*\/\/\/\s+\*\//g, "")
                         .replace(/export (number|string|boolean|float)[?]* (\w*) {\s+get/g, "get $2(): $1")
                         .replace(/(public|private|protected) (number|string|boolean) (\w*) \{ get {(.*)\}$/g, "$1 get $3(): $2 { $4")
+                        .replace(/(public|private|protected) (number|string|boolean) (\w*)\((.*)\)/g, "$1 $3($4): $2")
                         .replace(/foreach \(const (\w*) in ([\w.]*)\)/g, "for (let $1 in $2)")
-                        .replace(/(public |private |protected )(\w*)[:] (\w*) = > (.*)/g, "$1get $2(): $3 { return $4 }")
+                        .replace(/(public|private|protected) (\w*)[:] (\w*) = > (.*)/g, "$1 get $2(): $3 { return $4 }")
+                        // (number total, string temp, -> (total: number, temp: string
+                        .replace(/(number|string|boolean) (\w*),/g, "$2: $1,")
+                        // boolean flag) -> flag: boolean)
+                        .replace(/(number|string|boolean) (\w*)\)/g, "$2: $1)")
+                        // null: return; -> return null;
                         .replace(/(\w*):+\s*return;/g, "return $1;");
                         
   const tsFileName = csFileName.replace(".cs", ".ts");
