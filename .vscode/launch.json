@@ -35,6 +35,21 @@
             "sourceMaps": true,
             "outDir": "${workspaceRoot}/out/test",
             "preLaunchTask": "npm"
-        }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "current jest",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": [
+                "${relativeFile}",
+                "--env",
+                "node",
+                "--config",
+                "${workspaceRoot}/jest.config.js"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+          }
     ]
 }

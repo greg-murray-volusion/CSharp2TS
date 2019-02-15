@@ -88,7 +88,7 @@ export function generateClass(x: CSharpClass, config: ExtensionConfig): string {
     const inheritsTypes = x.inherits.map(x => generateType(x, config));
     const name = x.name;
     const modifier = (x.isPublic ? "export " : "");
-    const keyword = config.classToInterface ? "interface" : "class";
+    const keyword = config.classToInterface ? "interface" : x.type.trim();
     const extendsOrImplements = config.classToInterface ? "extends": "implements";
     const prefix = `${modifier}${keyword} ${name}`;
     if (inheritsTypes.length > 0) {

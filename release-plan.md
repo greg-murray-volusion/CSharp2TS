@@ -1,41 +1,39 @@
-# Release Plan
+# Release Plan / To do list
 
-1. this
-1. camelCase method names
+1. object init:
+
+    ```csharp
+    new Pricing {ListPrice = list, SalePrice = sale}
+    ```
+
 1. Utility
- - IsEqualIgnoreCase  (extension)
- - string.isNullOrEmpty
- - sum
- - Money
+    - jsdoc li ul remark
+    - IsEqualIgnoreCase  (extension)
+    - string.isNullOrEmpty
+    - sum
 1. casting
 1. get extra brace
-1. !. - to lodash get()
 
-
+```csharp
+// get property
 private number CalculatedSubTotal { get { return this.Items.Sum(x => x.SubTotal); } }
 
-private number GetTotalPercentagePriceReduction(number total)
-{
-
-}
-
+// casting
 return (number) TotalItems;
 
+// string methods
 string.IsNullOrWhiteSpace(phoneNumber))
 countryToValidate.ToLowerInvariant();
 
+// LINQ
+return this.Items.Sum(x => x.Quantity);
 
+// a couple of options:
 
+// lodash
+sumBy(this.Items, x => x.Quantity);
 
-return this.Items.Sum(x => x.Quantity);  -- sumBy(this.Items, x => x.Quantity);
--- this.Items.reduce((acc, x) => acc + x.Quantity);
+// es6
+this.Items.reduce((acc, x) => acc + x.Quantity);
 
-if (this.Total!.Amount != null)
-
-
-
-// general
-import Money (does it exist in v2-api?)
-validation.
-
-thi
+```
