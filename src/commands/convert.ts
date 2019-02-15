@@ -20,6 +20,16 @@ const defaultConfig: ExtensionConfig = {
     preserveModifiers: false
 };
 
+type Replacement = {
+  rgx: RegExp,
+  result: string;
+}
+
+export const replaceThis: Replacement = {
+  rgx: /([^a-zA-Z<.])([A-Z]{1}[a-zA-Z]+)(\.|!\.| = new)/g,
+  result: "$1this.$2$3"
+};
+
 const recursiveScan = (dir: string): string[] =>
   readdirSync(dir)
     .reduce((files: string[], file: string) =>
@@ -73,8 +83,13 @@ export const convertFile = (csFileName: string): void => {
                         .replace(/}";/g, "`;")
                         .replace(/(\w*): const = /g, "const $1 = ")
                         .replace(/foreach \(const (\w*) in ([\w.]*)\)/g, "for (let $1 in $2)")
-                        .replace(/(?:\()([A-Z]{1}[a-z]+[A-Za-z0-9_.]*)/g, "(this.$1")
-                        .replace(/(?:\s)([A-Z]{1}[a-z]+[!.]+[A-Za-z0-9_.]*)/g, " this.$1")
+  
+                        // (Address.Test);    Address = new Address(); Address.Test
+                        // .replace(/([A-Z]{1}[a-z]+)(\.| = )/g, "this.$1$2")
+                        // .replace(/([A-Z]?[a-z]+)(\.|!\.| = new)/g, "this.$1$2")
+                        //.replace(/([^A-Za-z<.])([A-Z]?[a-z]+)(\.|!\.| = new)/g, "$1this.$2$3")
+                        .replace(replaceThis.rgx, replaceThis.result)
+
                         .replace(/\/\*\*\/\/\/\s+\*\//g, "")
                         .replace(/export (number|string|boolean|float)[?]* (\w*) {\s+get/g, "get $2(): $1")
                         // cs2ts is incorrectly converting

@@ -103,17 +103,21 @@
     },
     "scripts": {
         "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -watch -p ./",
+        "compile": "tsc -watch -p tsconfig.json",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test",
-        "convert": "node ./out/src/index.js convert"
+        "convert": "node ./out/src/index.js convert",
+        "jest": "jest --env node --config ./jest.config.js"
     },
     "devDependencies": {
         "@types/glob": "^7.1.1",
+        "@types/jest": "^24.0.5",
         "@types/mocha": "^2.2.32",
         "@types/node": "^6.0.40",
+        "jest": "^23.6.0",
         "mocha": "^2.3.3",
-        "typescript": "^2.0.3",
+        "ts-jest": "^23.10.5",
+        "typescript": "^2.9.2",
         "vscode": "^1.0.0"
     },
     "dependencies": {
