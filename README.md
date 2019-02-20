@@ -137,12 +137,27 @@ On your workspace or user `settings.json`:
 
 ## Call from command line
 
-To be able to process multiple files, you can use an npm script, which either takes a directory or a single file name.
+To be able to process multiple files, you can use an npm script, which either takes a directory or a single file name.  It calls the same method as the extension to process the file initially, and then it applies additional transformations via regular expression replacements.
 
 ```bash
+# in separate terminal
+npm run compile
+
 # directory
 npm run convert -- -d "$HOME/projects/v2/store-api-monorepo/store-api/Source/ViewModels/Common" -V
 
 # file name
 npm run convert -- -n "$HOME/projects/v2/store-api-monorepo/store-api/Source/ViewModels/SEOMetaData.cs" -V
+```
+
+### Primary files
+
+[src/commands/convert.ts](src/commands/convert.ts)
+
+[test/convertRegex.spec.ts](test/convertRegex.spec.ts)
+
+To run tests use
+
+```bash
+npm run jest
 ```
