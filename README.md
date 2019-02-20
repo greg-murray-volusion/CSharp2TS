@@ -135,7 +135,7 @@ On your workspace or user `settings.json`:
 - New config: `removeWithModifier`. Remove fields and properties with the given modifiers.
 - New config: `removeNameRegex`. Remove fields and properties that its name match the given regex.
 
-## Call from command line
+## Command Line (work in progress)
 
 To be able to process multiple files, you can use an npm script, which either takes a directory or a single file name.  It calls the same method as the extension to process the file initially, and then it applies additional transformations via regular expression replacements.
 
@@ -161,3 +161,5 @@ To run tests use
 ```bash
 npm run jest
 ```
+
+This is a work in progress and is quite fragile right now.  See [release-plan](release-plan.md) for partial list of items to fix or add.

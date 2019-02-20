@@ -13,6 +13,7 @@
     - sum
 1. casting
 1. get extra brace
+1. recursive scan of directories does not appear to function.
 
 ```csharp
 // get property
