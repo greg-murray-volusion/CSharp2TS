@@ -56,18 +56,18 @@ export const replaceInterfaceMethod: ReplacementFn = {
   transform: (match: string, p1: string, p2: string, p3: string) => `${toCamelCase(p2)}(${p3}): ${p1};`
 };
 export const replaceAsyncMethod: ReplacementFn = {
-  rgx: /(public|private|protected) async (number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\)/g,
+  rgx: /(public|private|protected) async (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)\)/g,
   transform: (match: string, p1: string, p2: string, p3: string, p4: string) => 
     `${p1} async ${toCamelCase(p3)}(${p4}): ${p2}`
 };
 export const replaceAsyncMethodMultiline: ReplacementFn = {
-  rgx: /(public|private|protected) async (number|string|boolean|\w*\<\w*\>) (\w*)\((.*)+(\s.*)?\)/g,
+  rgx: /(public|private|protected) async (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)+(\s.*)?\)/g,
   transform: (match: string, p1: string, p2: string, p3: string, p4: string, p5: string) => 
     `${p1} async ${toCamelCase(p3)}(${p4}${p5 ? " " + p5 : ""}): ${p2}`
 };
 
 export const replaceMethodParameters: Replacement = {
-  rgx: /(number|string|boolean|[A-Z]+[a-z0-9]*|\w*\<\w*\>) (\w*)(,|\)| = \w*)/g,
+  rgx: /(number|string|boolean|[A-Z]+[a-z0-9]*|\w*\<[^>]*\>\>?) (\w*)(,|\)| = \w*)/g,
   transform: "$2: $1$3"
 };
 
@@ -134,15 +134,15 @@ export const postCleanup = (tsCode: string): string =>
     .replace(replaceJsDocCode.rgx, replaceJsDocCode.transform)
     .replace(replaceJsDocList.rgx, replaceJsDocList.transform)
     .replace(replaceSingleLineComment.rgx, replaceSingleLineComment.transform)
-    .replace(/export (number|string|boolean|\w*\<\w*\>)[?]* (\w*) {\s+get/g, "get $2(): $1")
+    .replace(/export (number|string|boolean|\w*\<[^>]*\>\>?)[?]* (\w*) {\s+get/g, "get $2(): $1")
     // cs2ts is incorrectly converting
     // public static bool IsUS(string country)
     // boolean IsUS(string country): static {
     // so have to fix it -> static IsUS(country: string): boolean
     .replace(/(number|string|boolean) (\w*)\((.*)\): static/g, "static $2($3): $1")
-    .replace(/(public|private|protected) static (number|string|boolean|\w*\<\w*\>) (\w*)\((.*)\)/g, "$1 static $3($4): $2")
-    .replace(/(public|private|protected) (number|string|boolean|\w*\<\w*\>) (\w*) \{ get {(.*)\}$/g, "$1 get $3(): $2 { $4")
-    .replace(/(public|private|protected) (number|string|boolean|\w*\<\w*\>) (\w*)\((.*)\)/g, "$1 $3($4): $2")
+    .replace(/(public|private|protected) static (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)\)/g, "$1 static $3($4): $2")
+    .replace(/(public|private|protected) (number|string|boolean|\w*\<[^>]*\>\>?) (\w*) \{ get {(.*)\}$/g, "$1 get $3(): $2 { $4")
+    .replace(/(public|private|protected) (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)\)/g, "$1 $3($4): $2")
     // fix for broken arrow function
     .replace(/(public|private|protected) (\w*)[:] (\w*) = > (.*)/g, "$1 get $2(): $3 { return $4 }")
     .replace(replaceAsyncMethod.rgx, replaceAsyncMethod.transform)

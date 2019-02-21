@@ -252,7 +252,7 @@ describe("convert", () => {
             // // tslint:disable-next-line no-console
             // console.log("ns task cs2result", cs2result);
         });
-        xit("should convert async methods with nested generic return type", () => {
+        it("should convert async methods with nested generic return type", () => {
             const source = "public async Task<OkNegotiatedContentResult<Order>> GetAsync(string orderNumber, string email)";
             const expected = "public async getAsync(string orderNumber, string email): Task<OkNegotiatedContentResult<Order>>"
             const actual = source.replace(replaceAsyncMethod.rgx, replaceAsyncMethod.transform);
@@ -263,8 +263,8 @@ describe("convert", () => {
             expect(fullConversion).toEqual(expectedFull);
 
             // const cs2result = cs2ts(source, defaultConfig);
-            // // tslint:disable-next-line no-console
-            // console.log("ns task cs2result", cs2result);
+            // tslint:disable-next-line no-console
+            // console.log("cs2result", cs2result);
         });
         it("should convert async methods spanning multiple lines", () => {
             const source = `public async Task<Inventory> DecrementInventoryAsync(string tenant,
