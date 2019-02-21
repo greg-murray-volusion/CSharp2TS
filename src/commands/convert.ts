@@ -24,74 +24,74 @@ const toCamelCase = s => s && s.length > 0 ? s.substring(0,1).toLowerCase() +  s
 
 interface Replacement {
   rgx: RegExp;
-  result: string;
+  transform: string;
 };
 interface ReplacementFn {
   rgx: RegExp;
-  result: (match: string, p1: string, ...rest: string[]) => string;
+  transform: (match: string, p1: string, ...rest: string[]) => string;
 };
 
 export const replaceThis: Replacement = {
   rgx: /([^a-zA-Z<."])([A-Z]{1}[a-zA-Z]+)(\.[A-Za-z]|!\.[A-Za-z]| = new)/g,
-  result: "$1this.$2$3"
+  transform: "$1this.$2$3"
 };
 export const replaceNullOperator: ReplacementFn = {
   rgx: /(\w*)[?]?\.((\w*\?\.\w*)+) /g,
-  result: (match: string, p1: string, p2: string) => `get(${p1}, \"${p2.replace(/[?]/g, "")}\", null) `
+  transform: (match: string, p1: string, p2: string) => `get(${p1}, \"${p2.replace(/[?]/g, "")}\", null) `
 };
 export const replacePascalCaseProps: ReplacementFn = {
   rgx: /(\w*): (number|string|boolean|Date)/g, 
-  result: (match: string, p1: string, p2: string) => `${toCamelCase(p1)}: ${p2}`
+  transform: (match: string, p1: string, p2: string) => `${toCamelCase(p1)}: ${p2}`
 };
 export const replacePascalCaseMethodsOrProps: ReplacementFn = {
   rgx: /(public|private|protected) (\w*)(\(|:)/g, 
-  result: (match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
+  transform: (match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
 };
 export const replaceStaticMethod: ReplacementFn = {
   rgx: /(number|string|boolean|bool) (\w*)\((.*)\): static/g,
-  result: (match: string, p1: string, p2: string, p3: string) => `static ${toCamelCase(p2)}(${p3}): ${p1}`
+  transform: (match: string, p1: string, p2: string, p3: string) => `static ${toCamelCase(p2)}(${p3}): ${p1}`
 };
 export const replaceInterfaceMethod: ReplacementFn = {
   rgx: /(number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\);/g,
-  result: (match: string, p1: string, p2: string, p3: string) => `${toCamelCase(p2)}(${p3}): ${p1};`
+  transform: (match: string, p1: string, p2: string, p3: string) => `${toCamelCase(p2)}(${p3}): ${p1};`
 };
 export const replaceAsyncMethod: ReplacementFn = {
   rgx: /(public|private|protected) async (number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\)/g,
-  result: (match: string, p1: string, p2: string, p3: string, p4: string) => 
+  transform: (match: string, p1: string, p2: string, p3: string, p4: string) => 
     `${p1} async ${toCamelCase(p3)}(${p4}): ${p2}`
 };
 export const replaceAsyncMethodMultiline: ReplacementFn = {
   rgx: /(public|private|protected) async (number|string|boolean|\w*\<\w*\>) (\w*)\((.*)+(\s.*)?\)/g,
-  result: (match: string, p1: string, p2: string, p3: string, p4: string, p5: string) => 
+  transform: (match: string, p1: string, p2: string, p3: string, p4: string, p5: string) => 
     `${p1} async ${toCamelCase(p3)}(${p4}${p5 ? " " + p5 : ""}): ${p2}`
 };
 
 export const replaceMethodParameters: Replacement = {
   rgx: /(number|string|boolean|[A-Z]+[a-z0-9]*|\w*\<\w*\>) (\w*)(,|\)| = \w*)/g,
-  result: "$2: $1$3"
+  transform: "$2: $1$3"
 };
 
 export const replaceTemplateString: ReplacementFn = {
   rgx: /\$"(.*)"/g,
-  result: (match: string, p1: string) => `\`${p1.replace(/{/g, "${")}\``
+  transform: (match: string, p1: string) => `\`${p1.replace(/{/g, "${")}\``
 };
 
 // null: return; -> return null;
 export const replaceMistakeOnReturn: Replacement = {
   rgx: /(\w*): *return/g,
-  result: "return $1"
+  transform: "return $1"
 };
 export const replaceSingleLineComment: Replacement = {
   rgx: /(\/\*\*)([^*]*)(\*\/)/g,
-  result: "$1\n         * $2\n         $3"
+  transform: "$1\n         * $2\n         $3"
 };
 export const replaceJsDocCode: Replacement = {
   rgx: /(@code\s+(\w+))/g, 
-  result: "`$2`"
+  transform: "`$2`"
 };
 export const replaceJsDocList: Replacement = {
   rgx: /(@ul|@li)/g, 
-  result: "-"
+  transform: "-"
 };
 
 const recursiveScan = (dir: string): string[] =>
@@ -120,20 +120,20 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/\.ToLower(Invariant)?\(\)/g, ".toLowerCase()")
     .replace(/string.IsNullOr(WhiteSpace|Empty)?\(/g, "isEmpty(")
     // obj.obj?.prop -> obj!.prop 
-    .replace(replaceNullOperator.rgx, replaceNullOperator.result)
+    .replace(replaceNullOperator.rgx, replaceNullOperator.transform)
     // check for null t ?? s -> t || s
     .replace(/[?]{2}/g, "||")
-    .replace(replaceTemplateString.rgx, replaceTemplateString.result)
+    .replace(replaceTemplateString.rgx, replaceTemplateString.transform)
     .replace(/(\w*): const = /g, "const $1 = ")
     .replace(/foreach \(const (\w*) in ([\w.]*)\)/g, "for (let $1 in $2)")
-    .replace(replaceThis.rgx, replaceThis.result)
-    .replace(replacePascalCaseProps.rgx, replacePascalCaseProps.result)
+    .replace(replaceThis.rgx, replaceThis.transform)
+    .replace(replacePascalCaseProps.rgx, replacePascalCaseProps.transform)
     // empty jsdoc comment
     .replace(/\/\*\*\/\/\/\s+\*\//g, "")
     .replace(/(\#region(.*)|\#endregion(.*))/g, "// $1")
-    .replace(replaceJsDocCode.rgx, replaceJsDocCode.result)
-    .replace(replaceJsDocList.rgx, replaceJsDocList.result)
-    .replace(replaceSingleLineComment.rgx, replaceSingleLineComment.result)
+    .replace(replaceJsDocCode.rgx, replaceJsDocCode.transform)
+    .replace(replaceJsDocList.rgx, replaceJsDocList.transform)
+    .replace(replaceSingleLineComment.rgx, replaceSingleLineComment.transform)
     .replace(/export (number|string|boolean|\w*\<\w*\>)[?]* (\w*) {\s+get/g, "get $2(): $1")
     // cs2ts is incorrectly converting
     // public static bool IsUS(string country)
@@ -145,12 +145,12 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/(public|private|protected) (number|string|boolean|\w*\<\w*\>) (\w*)\((.*)\)/g, "$1 $3($4): $2")
     // fix for broken arrow function
     .replace(/(public|private|protected) (\w*)[:] (\w*) = > (.*)/g, "$1 get $2(): $3 { return $4 }")
-    .replace(replaceAsyncMethod.rgx, replaceAsyncMethod.result)
-    .replace(replaceAsyncMethodMultiline.rgx, replaceAsyncMethodMultiline.result)
-    .replace(replacePascalCaseMethodsOrProps.rgx, replacePascalCaseMethodsOrProps.result)
-    .replace(replaceInterfaceMethod.rgx, replaceInterfaceMethod.result)
-    .replace(replaceMethodParameters.rgx, replaceMethodParameters.result)
-    .replace(replaceMistakeOnReturn.rgx, replaceMistakeOnReturn.result)
+    .replace(replaceAsyncMethod.rgx, replaceAsyncMethod.transform)
+    .replace(replaceAsyncMethodMultiline.rgx, replaceAsyncMethodMultiline.transform)
+    .replace(replacePascalCaseMethodsOrProps.rgx, replacePascalCaseMethodsOrProps.transform)
+    .replace(replaceInterfaceMethod.rgx, replaceInterfaceMethod.transform)
+    .replace(replaceMethodParameters.rgx, replaceMethodParameters.transform)
+    .replace(replaceMistakeOnReturn.rgx, replaceMistakeOnReturn.transform)
     // fix error and convert to triple equals
     .replace(/( = = | == )/g, " === ")
     .replace(/ != /g, " !== ");
