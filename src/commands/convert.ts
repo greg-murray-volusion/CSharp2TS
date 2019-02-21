@@ -114,6 +114,12 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/(?<=\d)(m){1}/g, "")
     // xs.Count() -> xs.length
     .replace(/\.Count\(\)/g, ".length")
+    // LINQ methods
+    .replace(/\.Any\(/g, ".some(")
+    .replace(/\.Where\(/g, ".filter(")
+    .replace(/\.FirstOrDefault\(/g, ".find(")
+    .replace(/\.Select\(/g, ".map(")
+    .replace(/\.ToList\(\)/g, "")
     // s.Replace("-", "") || s.StartsWith("T") -> s.replace("-", "") || s.startsWith("T")
     .replace(/(Replace|StartsWith|EndsWith)\(/g, toCamelCase)
     // c.ToLowerInvariant() || c.ToLower() -> c.toLowerCase() || c.toLowerCase()
