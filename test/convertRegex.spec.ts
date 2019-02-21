@@ -53,9 +53,19 @@ describe("convert", () => {
     });
     describe("static method", () => {
         it("should convert static method and camelCase the method name", () => {
-            // (number|string|boolean|bool) (\w*)\((.*)\): static/g
-            const source = "bool HasNoCreditCardNumber(string input): static";
-            const expected = "static hasNoCreditCardNumber(string input): bool";
+            const source = "boolean HasNoCreditCardNumber(string input): static";
+            const expected = "public static hasNoCreditCardNumber(string input): boolean";
+
+            const actual = source.replace(replaceStaticMethod.rgx, replaceStaticMethod.transform);
+            expect(actual).toEqual(expected);
+
+            const expectedFull = "public static hasNoCreditCardNumber(input: string): boolean";
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expectedFull);
+        });
+        it("should convert static method and camelCase the method name", () => {
+            const source = "boolean ShouldFlagForReview(OrderVerification ov): static";
+            const expected = "public static shouldFlagForReview(OrderVerification ov): boolean";
             const actual = source.replace(replaceStaticMethod.rgx, replaceStaticMethod.transform);
             expect(actual).toEqual(expected);
         });

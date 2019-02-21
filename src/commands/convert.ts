@@ -43,9 +43,10 @@ export const replacePascalCaseMethodsOrProps: ReplacementFn = {
   rgx: /(public|private|protected) (\w*)(\(|:)/g, 
   transform: (match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
 };
+// cs2ts has already incorrectly converted method
 export const replaceStaticMethod: ReplacementFn = {
-  rgx: /(number|string|boolean|bool) (\w*)\((.*)\): static/g,
-  transform: (match: string, p1: string, p2: string, p3: string) => `static ${toCamelCase(p2)}(${p3}): ${p1}`
+  rgx: /(number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\): static/g,
+  transform: (match: string, p1: string, p2: string, p3: string) => `public static ${toCamelCase(p2)}(${p3}): ${p1}`
 };
 export const replaceInterfaceMethod: ReplacementFn = {
   rgx: /(number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\);/g,
@@ -100,8 +101,8 @@ const recursiveScan = (dir: string): string[] =>
 
 export const postCleanup = (tsCode: string): string => 
   tsCode
-    .replace(/(decimal|float|double|long|int )[?]*/g, "number")
-    .replace(/bool/g, "boolean")
+    .replace(/(decimal|float|double|long|uint|int )[?]*/g, "number")
+    .replace(/ bool[?]? /g, " boolean ")
     .replace(/var /g, "const ")
     // new List<List<string>>() -> new Array<Array<string>>();
     .replace(/([I]?List|IArray)</g, "Array<")
@@ -120,7 +121,7 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/(Replace|StartsWith|EndsWith)\(/g, toCamelCase)
     // c.ToLowerInvariant() || c.ToLower() -> c.toLowerCase() || c.toLowerCase()
     .replace(/\.ToLower(Invariant)?\(\)/g, ".toLowerCase()")
-    .replace(/string.IsNullOr(WhiteSpace|Empty)+\(/g, "String.isNullOr$1(")
+    .replace(/[sS]tring.IsNullOr(WhiteSpace|Empty)+\(/g, "String.isNullOr$1(")
     // obj.obj?.prop -> obj!.prop 
     .replace(replaceNullOperator.rgx, replaceNullOperator.transform)
     // check for null t ?? s -> t || s
@@ -140,8 +141,9 @@ export const postCleanup = (tsCode: string): string =>
     // public static bool IsUS(string country)
     // boolean IsUS(string country): static {
     // so have to fix it -> static IsUS(country: string): boolean
-    .replace(/(number|string|boolean) (\w*)\((.*)\): static/g, "static $2($3): $1")
-    .replace(/(public|private|protected) static (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)\)/g, "$1 static $3($4): $2")
+    .replace(replaceStaticMethod.rgx, replaceStaticMethod.transform)
+    // .replace(/(number|string|boolean) (\w*)\((.*)\): static/g, "static $2($3): $1")
+    // .replace(/(public|private|protected) static (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)\)/g, "$1 static $3($4): $2")
     .replace(/(public|private|protected) (number|string|boolean|\w*\<[^>]*\>\>?) (\w*) \{ get {(.*)\}$/g, "$1 get $3(): $2 { $4")
     .replace(/(public|private|protected) (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)\)/g, "$1 $3($4): $2")
     // fix for broken arrow function
