@@ -266,6 +266,20 @@ describe("convert", () => {
             // tslint:disable-next-line no-console
             // console.log("cs2result", cs2result);
         });
+        it("should convert async methods with no parameters", () => {
+            const source = "public async Task<OkNegotiatedContentResult<StoreSettings>> GetAsync()";
+            const expected = "public async getAsync(): Task<OkNegotiatedContentResult<StoreSettings>>"
+            const actual = source.replace(replaceAsyncMethod.rgx, replaceAsyncMethod.transform);
+            expect(actual).toEqual(expected);
+
+            const expectedFull = "public async getAsync(): Promise<OkNegotiatedContentResult<StoreSettings>>"
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expectedFull);
+
+            // const cs2result = cs2ts(source, defaultConfig);
+            // tslint:disable-next-line no-console
+            // console.log("cs2result", cs2result);
+        });
         it("should convert async methods spanning multiple lines", () => {
             const source = `public async Task<Inventory> DecrementInventoryAsync(string tenant,
                 IList<InventoryChangeRequest> inventoryChangeRequests)`;

@@ -118,7 +118,7 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/(Replace|StartsWith|EndsWith)\(/g, toCamelCase)
     // c.ToLowerInvariant() || c.ToLower() -> c.toLowerCase() || c.toLowerCase()
     .replace(/\.ToLower(Invariant)?\(\)/g, ".toLowerCase()")
-    .replace(/string.IsNullOr(WhiteSpace|Empty)?\(/g, "isEmpty(")
+    .replace(/string.IsNullOr(WhiteSpace|Empty)+\(/g, "String.isNullOr$1(")
     // obj.obj?.prop -> obj!.prop 
     .replace(replaceNullOperator.rgx, replaceNullOperator.transform)
     // check for null t ?? s -> t || s
