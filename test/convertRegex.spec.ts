@@ -12,49 +12,12 @@ import {
     replacePascalCaseProps,
     replaceSingleLineComment,
     replaceStaticMethod,
-    replaceThis,
     replaceTemplateString,
     replaceJsDocList
 } from "../src/commands/convert";
 import { cs2ts } from "../src/converter";
 
 describe("convert", () => {
-    describe("this", () => {
-        it("requires leading space", () => {
-            const source = " TrackingInformation = new Array<Tracking>();";
-            const expected = " this.TrackingInformation = new Array<Tracking>();";
-            const actual = source.replace(replaceThis.rgx, replaceThis.transform);
-            expect(actual).toEqual(expected);
-
-            const fullConversion = convertSource(source);
-            expect(fullConversion).toEqual(expected);
-        });
-        it("should not replace camelCase", () => {
-            const source = "return eventType.IsEqualIgnoreCase(\"Shipped\")";
-            const actual = source.replace(replaceThis.rgx, replaceThis.transform);
-            expect(actual).toEqual(source);
-        });
-        it("should not replace comment", () => {
-            const source = "/// The AddressBook.";
-            const actual = source.replace(replaceThis.rgx, replaceThis.transform);
-            expect(actual).toEqual(source);
-        });
-        xit("should not replace prop initializer", () => {
-            const source = "public FulfillmentData FulfillmentData { get; set; } = new FulfillmentData();";
-            const expected = source;
-            const actual = source.replace(replaceThis.rgx, replaceThis.transform);
-            expect(actual).toEqual(expected);
-
-            const fullConversion = convertSource(source);
-            expect(fullConversion).toEqual(expected);
-        });
-        it("replace valid scenarios", () => {
-            const source = "(Addr.Test); Addr = new Addr(); Addr.Test; Res(item.ErrorMessage,";
-            const expected = "(this.Addr.Test); this.Addr = new Addr(); this.Addr.Test; Res(item.ErrorMessage,";
-            const actual = source.replace(replaceThis.rgx, replaceThis.transform);
-            expect(actual).toEqual(expected);
-        });
-    });
     describe("PascalCase", () => {
         it("should convert PascalCase public properties to camelCase", () => {
             const source = "public FriendlyName: string;";
@@ -313,6 +276,13 @@ describe("convert", () => {
             // const fullConversion = convertSource(source);
             // expect(fullConversion).toEqual(expectedFull);
         });
+        it("should convert bool to boolean as return type", () => {
+            const source = "private bool ProductHasTrackedInventory(Product product)";
+            const expected = "private productHasTrackedInventory(product: Product): boolean";
+
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expected);
+        });
     });
     describe("variable declarations", () => {
         it("should fix mistake on return", () => {
@@ -333,7 +303,7 @@ describe("convert", () => {
             expect(actual).toEqual(expected);
 
             const expectedFull = `case "charge":
-            return !isEmpty(order.PayPalPaymentTransactionId) &&
+            return !String.isNullOrWhiteSpace(order.PayPalPaymentTransactionId) &&
                    !paymentLifecycleEvent.IsPayPalInitiated;`;
             const fullConversion = convertSource(source);
             expect(fullConversion).toEqual(expectedFull);

@@ -31,10 +31,6 @@ interface ReplacementFn {
   transform: (match: string, p1: string, ...rest: string[]) => string;
 };
 
-export const replaceThis: Replacement = {
-  rgx: /([^a-zA-Z<."])([A-Z]{1}[a-zA-Z]+)(\.[A-Za-z]|!\.[A-Za-z]| = new)/g,
-  transform: "$1this.$2$3"
-};
 export const replaceNullOperator: ReplacementFn = {
   rgx: /(\w*)[?]?\.((\w*\?\.\w*)+) /g,
   transform: (match: string, p1: string, p2: string) => `get(${p1}, \"${p2.replace(/[?]/g, "")}\", null) `
@@ -132,7 +128,6 @@ export const postCleanup = (tsCode: string): string =>
     .replace(replaceTemplateString.rgx, replaceTemplateString.transform)
     .replace(/(\w*): const = /g, "const $1 = ")
     .replace(/foreach \(const (\w*) in ([\w.]*)\)/g, "for (let $1 in $2)")
-    .replace(replaceThis.rgx, replaceThis.transform)
     .replace(replacePascalCaseProps.rgx, replacePascalCaseProps.transform)
     // empty jsdoc comment
     .replace(/\/\*\*\/\/\/\s+\*\//g, "")
