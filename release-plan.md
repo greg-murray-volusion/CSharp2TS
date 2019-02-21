@@ -7,13 +7,12 @@
     ```
 
 1. Utility
-    - jsdoc li ul remark
     - IsEqualIgnoreCase  (extension)
     - string.isNullOrEmpty
     - sum
 1. casting
-1. get extra brace
-1. recursive scan of directories does not appear to function.
+1. "get" leaves extra brace
+1. recursive scan of directories has problem with large files, like DomainServices/Payment/AuthorizeDotNetPaymentService.cs
 
 ```csharp
 // get property

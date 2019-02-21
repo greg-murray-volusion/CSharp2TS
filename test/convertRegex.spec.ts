@@ -13,7 +13,8 @@ import {
     replaceSingleLineComment,
     replaceStaticMethod,
     replaceThis,
-    replaceTemplateString
+    replaceTemplateString,
+    replaceJsDocList
 } from "../src/commands/convert";
 import { cs2ts } from "../src/converter";
 
@@ -113,6 +114,39 @@ describe("convert", () => {
             const fullConversion = convertSource(source);
             expect(fullConversion).toEqual(expected);
         });
+        it("should convert jsdoc @ul, @li to markdown list items", () => {
+            const source = `/**
+            * @param validationContext The validation context.
+            * @p
+            * Filterable Fields
+            * @ul
+            * @li  Equals (eq)
+            * @ul
+            * @li  seo.friendlyName
+            * @li  parentId
+            * @li  id
+            * @li  Starts With (sw)
+            * @ul
+            * @li  name
+            */`
+            const expected = `/**
+            * @param validationContext The validation context.
+            * @p
+            * Filterable Fields
+            * -
+            * -  Equals (eq)
+            * -
+            * -  seo.friendlyName
+            * -  parentId
+            * -  id
+            * -  Starts With (sw)
+            * -
+            * -  name
+            */`
+            const actual = source.replace(replaceJsDocList.rgx, replaceJsDocList.result);
+            expect(actual).toEqual(expected);
+        });
+
     });
     describe("null operator", () => {
         it("should replace null operator with lodash get", () => {

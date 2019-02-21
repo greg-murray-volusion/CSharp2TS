@@ -89,6 +89,10 @@ export const replaceJsDocCode: Replacement = {
   rgx: /(@code\s+(\w+))/g, 
   result: "`$2`"
 };
+export const replaceJsDocList: Replacement = {
+  rgx: /(@ul|@li)/g, 
+  result: "-"
+};
 
 const recursiveScan = (dir: string): string[] =>
   readdirSync(dir)
@@ -128,6 +132,7 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/\/\*\*\/\/\/\s+\*\//g, "")
     .replace(/(\#region(.*)|\#endregion(.*))/g, "// $1")
     .replace(replaceJsDocCode.rgx, replaceJsDocCode.result)
+    .replace(replaceJsDocList.rgx, replaceJsDocList.result)
     .replace(replaceSingleLineComment.rgx, replaceSingleLineComment.result)
     .replace(/export (number|string|boolean|\w*\<\w*\>)[?]* (\w*) {\s+get/g, "get $2(): $1")
     // cs2ts is incorrectly converting
