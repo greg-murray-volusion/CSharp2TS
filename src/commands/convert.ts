@@ -66,9 +66,20 @@ export const replaceAsyncMethodMultiline: ReplacementFn = {
     `${p1} async ${toCamelCase(p3)}(${p4}${p5 ? " " + p5 : ""}): ${p2}`
 };
 
+export const replaceMethodParameters: Replacement = {
+  rgx: /(number|string|boolean|[A-Z]+[a-z0-9]*|\w*\<\w*\>) (\w*)(,|\)| = \w*)/g,
+  result: "$2: $1$3"
+};
+
 export const replaceTemplateString: ReplacementFn = {
   rgx: /\$"(.*)"/g,
   result: (match: string, p1: string) => `\`${p1.replace(/{/g, "${")}\``
+};
+
+// null: return; -> return null;
+export const replaceMistakeOnReturn: Replacement = {
+  rgx: /(\w*): *return/g,
+  result: "return $1"
 };
 export const replaceSingleLineComment: Replacement = {
   rgx: /(\/\*\*)([^*]*)(\*\/)/g,
@@ -90,11 +101,12 @@ const recursiveScan = (dir: string): string[] =>
 export const postCleanup = (tsCode: string): string => 
   tsCode
     .replace(/(decimal|float|double|long|int )[?]*/g, "number")
-    .replace(/ bool /g, " boolean ")
+    .replace(/bool/g, "boolean")
     .replace(/var /g, "const ")
     // new List<List<string>>() -> new Array<Array<string>>();
     .replace(/([I]?List|IArray)</g, "Array<")
     .replace(/Task</g, "Promise<")
+    .replace(/ Task /g, " Promise<void> ")
     .replace(/(?<=\d)(m){1}/g, "")
     // xs.Count() -> xs.length
     .replace(/\.Count\(\)/g, ".length")
@@ -114,6 +126,7 @@ export const postCleanup = (tsCode: string): string =>
     .replace(replacePascalCaseProps.rgx, replacePascalCaseProps.result)
     // empty jsdoc comment
     .replace(/\/\*\*\/\/\/\s+\*\//g, "")
+    .replace(/(\#region(.*)|\#endregion(.*))/g, "// $1")
     .replace(replaceJsDocCode.rgx, replaceJsDocCode.result)
     .replace(replaceSingleLineComment.rgx, replaceSingleLineComment.result)
     .replace(/export (number|string|boolean|\w*\<\w*\>)[?]* (\w*) {\s+get/g, "get $2(): $1")
@@ -131,12 +144,8 @@ export const postCleanup = (tsCode: string): string =>
     .replace(replaceAsyncMethodMultiline.rgx, replaceAsyncMethodMultiline.result)
     .replace(replacePascalCaseMethodsOrProps.rgx, replacePascalCaseMethodsOrProps.result)
     .replace(replaceInterfaceMethod.rgx, replaceInterfaceMethod.result)
-    // (number total, string temp, -> (total: number, temp: string
-    .replace(/(number|string|boolean|\w*\<\w*\>) (\w*),/g, "$2: $1,")
-    // boolean flag) -> flag: boolean)
-    .replace(/(number|string|boolean|\w*\<\w*\>) (\w*)\)/g, "$2: $1)")
-    // null: return; -> return null;
-    .replace(/(\w*):+\s*return/g, "return $1")
+    .replace(replaceMethodParameters.rgx, replaceMethodParameters.result)
+    .replace(replaceMistakeOnReturn.rgx, replaceMistakeOnReturn.result)
     // fix error and convert to triple equals
     .replace(/( = = | == )/g, " === ")
     .replace(/ != /g, " !== ");

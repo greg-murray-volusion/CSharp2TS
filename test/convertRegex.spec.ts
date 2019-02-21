@@ -1,18 +1,19 @@
-
 import {
     convertSource,
+    defaultConfig,
+    replaceAsyncMethod,
+    replaceAsyncMethodMultiline,
+    replaceInterfaceMethod,
     replaceJsDocCode,
+    replaceMethodParameters,
+    replaceMistakeOnReturn,
     replaceNullOperator,
     replacePascalCaseMethodsOrProps,
     replacePascalCaseProps,
     replaceSingleLineComment,
     replaceStaticMethod,
     replaceThis,
-    defaultConfig,
-    replaceInterfaceMethod,
-    replaceTemplateString,
-    replaceAsyncMethod,
-    replaceAsyncMethodMultiline
+    replaceTemplateString
 } from "../src/commands/convert";
 import { cs2ts } from "../src/converter";
 
@@ -227,6 +228,51 @@ describe("convert", () => {
 
             const expectedFull = `public async decrementInventoryAsync(tenant: string, 
                 inventoryChangeRequests: Array<InventoryChangeRequest>): Promise<Inventory>`;
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expectedFull);
+        });
+        it("should convert non-primitive parameters", () => {
+            const source = "private async Task ProcessCanceledReversalStatus(Order order, string refundTransactionId)";
+            const expected = "private async Task ProcessCanceledReversalStatus(order: Order, refundTransactionId: string)";
+            const actual = source.replace(replaceMethodParameters.rgx, replaceMethodParameters.result);
+            expect(actual).toEqual(expected);
+           
+
+            const expectedFull = "private async processCanceledReversalStatus(order: Order, refundTransactionId: string): Promise<void>";
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expectedFull);
+        });
+        it("should convert non-primitive parameters", () => {
+            const source = "ProcessChargeCaptureError(Order order, string eventDescription, bool cancelOrder = false)";
+            const expected = "ProcessChargeCaptureError(order: Order, eventDescription: string, bool cancelOrder = false)";
+            const actual = source.replace(replaceMethodParameters.rgx, replaceMethodParameters.result);
+            expect(actual).toEqual(expected);
+            
+            // const fullConversion = convertSource(source);
+            // expect(fullConversion).toEqual(expectedFull);
+        });
+    });
+    describe("variable declarations", () => {
+        it("should fix mistake on return", () => {
+            const source = "null: return;";
+            const expected = "return null;";
+            const actual = source.replace(replaceMistakeOnReturn.rgx, replaceMistakeOnReturn.result);
+            expect(actual).toEqual(expected);
+
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expected);
+        });
+        it("should not convert case statements", () => {
+            const source = `case "charge":
+            return !string.IsNullOrWhiteSpace(order.PayPalPaymentTransactionId) &&
+                   !paymentLifecycleEvent.IsPayPalInitiated;`;
+            const expected = source;
+            const actual = source.replace(replaceMistakeOnReturn.rgx, replaceMistakeOnReturn.result);
+            expect(actual).toEqual(expected);
+
+            const expectedFull = `case "charge":
+            return !isEmpty(order.PayPalPaymentTransactionId) &&
+                   !paymentLifecycleEvent.IsPayPalInitiated;`;
             const fullConversion = convertSource(source);
             expect(fullConversion).toEqual(expectedFull);
         });
