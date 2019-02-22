@@ -156,7 +156,11 @@ export const postCleanup = (tsCode: string): string =>
     .replace(replaceMistakeOnReturn.rgx, replaceMistakeOnReturn.transform)
     // fix error and convert to triple equals
     .replace(/( = = | == )/g, " === ")
-    .replace(/ != /g, " !== ");
+    .replace(/ != /g, " !== ")
+    // replace I from interfaces
+    .replace(/(extends|implements|[:]) I([A-Z])/, "$1 $2")
+    .replace(/[,] I([A-Z]\w*)/g, ", $1")
+    .replace(/export interface I([A-Z])/, "export interface $1");
 
 export const convertSource = (csCode: string) => {
   const regexUsing = /using .*/g;

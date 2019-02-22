@@ -161,8 +161,9 @@ describe("convert", () => {
             const cs2tsConversion = cs2ts(source, defaultConfig);
             expect(cs2tsConversion).toEqual(expected);
 
+            const expectedFull = "export interface InventoryServiceSdk"
             const fullConversion = convertSource(source);
-            expect(fullConversion).toEqual(expected);
+            expect(fullConversion).toEqual(expectedFull);
         });
         it("should convert interface method", () => {
             const source = "Task<Inventory> IncrementInventoryAsync(string tenant, IArray<InventoryChangeRequest> inventoryChangeRequests);";
@@ -181,6 +182,20 @@ describe("convert", () => {
             expect(actual).toEqual(expected);
 
             const expectedFull = "getCartAsync(tenant: string, cartId: string): Promise<Models.Cart.Cart>;";
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expectedFull);
+        });
+        it("should remove 'I' from interface name", () => {
+            const source = "public class Order : IEntity, IMultiTenant, IRevisionable, IAuditable";
+            
+            const expectedFull = "export class Order implements Entity, MultiTenant, Revisionable, Auditable";
+            const fullConversion = convertSource(source);
+            expect(fullConversion.trim()).toEqual(expectedFull);
+        });
+        it("should not remove I from non-interface", () => {
+            const source = "public string Id;";
+
+            const expectedFull = "public id: string;"
             const fullConversion = convertSource(source);
             expect(fullConversion).toEqual(expectedFull);
         });
