@@ -43,6 +43,10 @@ export const replacePascalCaseMethodsOrProps: ReplacementFn = {
   rgx: /(public|private|protected) (\w*)(\(|:)/g,
   transform: (match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
 };
+export const replacePascalCaseStatements: ReplacementFn = {
+  rgx: /(\s*)([A-Z]\w*) = /g,
+  transform: (match: string, p1: string, p2: string) => `${p1}this.${toCamelCase(p2)} = `
+};
 // cs2ts has already incorrectly converted method
 export const replaceStaticMethod: ReplacementFn = {
   rgx: /(number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\): static/g,
@@ -141,6 +145,7 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/(\w*): const = /g, "const $1 = ")
     .replace(/foreach \(const (\w*) in ([\w.]*)\)/g, "for (const $1 of $2)")
     .replace(replacePascalCaseProps.rgx, replacePascalCaseProps.transform)
+    .replace(replacePascalCaseStatements.rgx, replacePascalCaseStatements.transform)
     // empty jsdoc comment
     .replace(/\/\*\*\/\/\/\s+\*\//g, "")
     .replace(/(\#region(.*)|\#endregion(.*))/g, "// $1")

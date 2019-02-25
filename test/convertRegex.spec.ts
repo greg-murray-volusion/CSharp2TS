@@ -15,7 +15,8 @@ import {
     replaceTemplateString,
     replaceJsDocList,
     replaceTestFixtureClass,
-    replaceTestMethod
+    replaceTestMethod,
+    replacePascalCaseStatements
 } from "../src/commands/convert";
 import { cs2ts } from "../src/converter";
 
@@ -26,12 +27,18 @@ describe("convert", () => {
             const expected = "public friendlyName: string;"
             const actual = source.replace(replacePascalCaseProps.rgx, replacePascalCaseProps.transform);
             expect(actual).toEqual(expected);
+
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expected);
         });
         it("should convert PascalCase interface properties to camelCase", () => {
             const source = "Address1: string;";
             const expected = "address1: string;"
             const actual = source.replace(replacePascalCaseProps.rgx, replacePascalCaseProps.transform);
             expect(actual).toEqual(expected);
+
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expected);
         });
         it("should convert PascalCase method to camelCase", () => {
             const source = "public Validate(";
@@ -47,6 +54,17 @@ describe("convert", () => {
             const source = "public MetaData: SEOMetadata;";
             const expected = "public metaData: SEOMetadata;"
             const actual = source.replace(replacePascalCaseMethodsOrProps.rgx, replacePascalCaseMethodsOrProps.transform);
+            expect(actual).toEqual(expected);
+
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expected);
+        });
+        it("should convert PascalCase statements to camelCase", () => {
+            const source = `
+            TransactionType = ipnParams["txn_type"];`;
+            const expected = `
+            this.transactionType = ipnParams["txn_type"];`
+            const actual = source.replace(replacePascalCaseStatements.rgx, replacePascalCaseStatements.transform);
             expect(actual).toEqual(expected);
 
             const fullConversion = convertSource(source);
