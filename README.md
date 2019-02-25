@@ -11,7 +11,7 @@ Simple C# POCOs to TypeScript converter.
 Supports:
 - Automatic properties
 - Remove attributes
-- Detect common types such as int, long, ... 
+- Detect common types such as int, long, ...
 
 ## Settings
 On your workspace or user `settings.json`:
@@ -25,7 +25,7 @@ On your workspace or user `settings.json`:
     "csharp2ts.trimPostfixes": "",
     //Whether or not trim postfixes recursive. (e.g. with postfixes 'A' & 'B' PersonAAB will become PersonAA when it's false & Person when it's true)
     "csharp2ts.recursiveTrimPostfixes": false,
-    //Ignore property initializer    
+    //Ignore property initializer
     "csharp2ts.ignoreInitializer": true
     //True to remove method bodies, false to preserve the body as-is
      "csharp2ts.removeMethodBodies": true,
@@ -131,7 +131,7 @@ On your workspace or user `settings.json`:
 - Bug fix: Support for fields
 - Bug fix: Translation was wrong on some special cases with generic types mixed with arrays
 - New config: `classToInterface`. Convert `class` to `interface` or `class`
-- New config: `preserveModifiers`. Preserve properties and field modifiers. 
+- New config: `preserveModifiers`. Preserve properties and field modifiers.
 - New config: `removeWithModifier`. Remove fields and properties with the given modifiers.
 - New config: `removeNameRegex`. Remove fields and properties that its name match the given regex.
 
@@ -148,6 +148,9 @@ npm run convert -- -d "$HOME/projects/v2/store-api-monorepo/store-api/Source/Vie
 
 # file name
 npm run convert -- -n "$HOME/projects/v2/store-api-monorepo/store-api/Source/ViewModels/SEOMetaData.cs" -V
+
+# with custom replacement rules, using a comma delimited list in pairs
+npm run convert -- -d "$HOME/projects/v2/store-api-monorepo/store-api/Source/WebApi/Controllers/Admin" -V -c "VolusionApiController,BaseHttpController"
 ```
 
 ### Primary files

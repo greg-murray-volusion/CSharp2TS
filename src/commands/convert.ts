@@ -35,6 +35,10 @@ export const replaceNullOperator: ReplacementFn = {
   rgx: /(\w*)[?]?\.((\w*\?\.\w*)+) /g,
   transform: (match: string, p1: string, p2: string) => `get(${p1}, \"${p2.replace(/[?]/g, "")}\", null) `
 };
+export const replaceNumbers: Replacement = {
+  rgx: /(decimal|float|double|long|uint|int)([ ?])+/g,
+  transform: "number$2"
+};
 export const replacePascalCaseProps: ReplacementFn = {
   rgx: /(\w*): (number|string|boolean|Date)/g,
   transform: (match: string, p1: string, p2: string) => `${toCamelCase(p1)}: ${p2}`
@@ -44,8 +48,8 @@ export const replacePascalCaseMethodsOrProps: ReplacementFn = {
   transform: (match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
 };
 export const replacePascalCaseStatements: ReplacementFn = {
-  rgx: /(\s*)([A-Z]\w*) = /g,
-  transform: (match: string, p1: string, p2: string) => `${p1}this.${toCamelCase(p2)} = `
+  rgx: /(\s*)+([A-Z]+[A-Za-z]+) = /g,
+  transform: (match: string, p1: string, p2: string) => `${p1 !== undefined ? p1 : ''}this.${toCamelCase(p2)} = `
 };
 // cs2ts has already incorrectly converted method
 export const replaceStaticMethod: ReplacementFn = {
@@ -111,7 +115,7 @@ const recursiveScan = (dir: string): string[] =>
 
 export const postCleanup = (tsCode: string): string =>
   tsCode
-    .replace(/(decimal|float|double|long|uint|int )[?]*/g, "number")
+    .replace(replaceNumbers.rgx, replaceNumbers.transform)
     .replace(/ bool[?]? /g, " boolean ")
     .replace(/var /g, "const ")
     // new List<List<string>>() -> new Array<Array<string>>();
@@ -198,16 +202,28 @@ export const convertSource = (csCode: string) => {
   return postCleanup(tsCode);
 }
 
-export const convertFile = (csFileName: string): void => {
+const applyCustomRules = (tsCode: string, customRules: string[]) => {
+  if (customRules.length === 0) {
+    return tsCode;
+  }
+  let result = tsCode;
+  for (let i = 0; i < customRules.length; i += 2) {
+    result = result.replace(new RegExp(customRules[i]), customRules[i + 1]);
+  }
+  return result;
+}
+
+export const convertFile = (csFileName: string, customRules: string[]): void => {
   const csCode = readFileSync(csFileName).toString();
   const cleanTsCode = convertSource(csCode);
+  const finalTsCode = applyCustomRules(cleanTsCode, customRules);
   const tsFileName = csFileName.replace(".cs", ".ts");
   // tslint:disable-next-line no-console
   console.log(`writing ${tsFileName}`);
-  writeFileSync(tsFileName, cleanTsCode, "utf8");
+  writeFileSync(tsFileName, finalTsCode, "utf8");
 }
 
-export const convertDirectory = (directory: string): void => {
+export const convertDirectory = (directory: string, customRules: string[]): void => {
   const recFiles = recursiveScan(directory);
-  recFiles.forEach(convertFile);
+  recFiles.forEach((recFile: string) => convertFile(recFile, customRules));
 }

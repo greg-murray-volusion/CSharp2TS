@@ -17,7 +17,10 @@ program
     .command("convert")
     .description(
         `Convert a C# file or directory to Typescript
-                    [-n, --name FILENAME] [-d, --directory DIRECTORY]`
+                    [-n, --name FILENAME]
+                    [-d, --directory DIRECTORY]
+                    [-c, --custom CUSTOM]
+                    `
     )
     .option(
         "-n, --name [filename]",
@@ -27,12 +30,31 @@ program
         "-d, --directory [directory]",
         "The source directory"
     )
-    .action(({ name, directory }) => {
+    .option(
+        "-c, --custom ['/import ApiController/g,import BaseHttpController']",
+        `Any custom rules to run at end of conversion.
+        Must be in pairs separated by a comma.
+        First of a pair is the regular expression string, and second is the replacement string.`
+    )
+    .action(({ name, directory, custom }) => {
         const fileName = typeof name !== "function" ? name : undefined;
+        let customRules: string[] = [];
+        const customRulesRaw: string | undefined = custom !== undefined && custom.length > 0 ? custom : undefined;
+        if (customRulesRaw) {
+            customRules = customRulesRaw.split(",");
+            if (customRules.length % 2 !== 0) {
+                // tslint:disable-next-line no-console
+                console.error("Custom rules must be in pairs");
+                program.outputHelp();
+                process.exit(1);
+            }
+        }
+        // tslint:disable-next-line no-console
+        console.log("custom", customRules);
         if (fileName !== undefined && fileName.length > 0) {
-            convertFile(fileName);
+            convertFile(fileName, customRules);
         } else if (directory !== undefined && directory.length > 0) {
-            convertDirectory(directory);
+            convertDirectory(directory, customRules);
         } else {
             program.outputHelp();
         }

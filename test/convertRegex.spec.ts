@@ -16,7 +16,8 @@ import {
     replaceJsDocList,
     replaceTestFixtureClass,
     replaceTestMethod,
-    replacePascalCaseStatements
+    replacePascalCaseStatements,
+    replaceNumbers
 } from "../src/commands/convert";
 import { cs2ts } from "../src/converter";
 
@@ -354,6 +355,24 @@ describe("convert", () => {
                    !paymentLifecycleEvent.IsPayPalInitiated;`;
             const fullConversion = convertSource(source);
             expect(fullConversion).toEqual(expectedFull);
+        });
+        it("should convert int? to number?", () => {
+            const source = "int?";
+            const expected = "number?";
+            const actual = source.replace(replaceNumbers.rgx, replaceNumbers.transform);
+            expect(actual).toEqual(expected);
+        });
+        it("should convert long to number?", () => {
+            const source = "public long TestMethod()";
+            const expected = "public number TestMethod()";
+            const actual = source.replace(replaceNumbers.rgx, replaceNumbers.transform);
+            expect(actual).toEqual(expected);
+        });
+        it("should not convert int or long when part of word", () => {
+            const source = "// integral to the longer term plans.";
+            const expected = source;
+            const actual = source.replace(replaceNumbers.rgx, replaceNumbers.transform);
+            expect(actual).toEqual(expected);
         });
     });
     describe("object initialization", () => {
