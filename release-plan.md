@@ -9,7 +9,8 @@
 1. Utility
     - IsEqualIgnoreCase  (extension)
     - string.isNullOrEmpty
-    - sum
+    - LINQ
+      - sum
 1. casting
 1. "get" leaves extra brace
 1. recursive scan of directories has problem with large files, like DomainServices/Payment/AuthorizeDotNetPaymentService.cs

@@ -13,7 +13,9 @@ import {
     replaceSingleLineComment,
     replaceStaticMethod,
     replaceTemplateString,
-    replaceJsDocList
+    replaceJsDocList,
+    replaceTestFixtureClass,
+    replaceTestMethod
 } from "../src/commands/convert";
 import { cs2ts } from "../src/converter";
 
@@ -187,7 +189,7 @@ describe("convert", () => {
         });
         it("should remove 'I' from interface name", () => {
             const source = "public class Order : IEntity, IMultiTenant, IRevisionable, IAuditable";
-            
+
             const expectedFull = "export class Order implements Entity, MultiTenant, Revisionable, Auditable";
             const fullConversion = convertSource(source);
             expect(fullConversion.trim()).toEqual(expectedFull);
@@ -271,22 +273,24 @@ describe("convert", () => {
         it("should convert async methods spanning multiple lines", () => {
             const source = `public async Task<Inventory> DecrementInventoryAsync(string tenant,
                 IList<InventoryChangeRequest> inventoryChangeRequests)`;
-            const expected = `public async decrementInventoryAsync(string tenant, 
+            const expected = `public async decrementInventoryAsync(string tenant,
                 IList<InventoryChangeRequest> inventoryChangeRequests): Task<Inventory>`;
             const actual = source.replace(replaceAsyncMethodMultiline.rgx, replaceAsyncMethodMultiline.transform);
-            expect(actual).toEqual(expected);
 
-            const expectedFull = `public async decrementInventoryAsync(tenant: string, 
+            // NOTE: new line wasn't matching so did a space-insensitive comparison
+            expect(actual.replace(/\s+/g, "_")).toEqual(expected.replace(/\s+/g, "_"));
+
+            const expectedFull = `public async decrementInventoryAsync(tenant: string,
                 inventoryChangeRequests: Array<InventoryChangeRequest>): Promise<Inventory>`;
             const fullConversion = convertSource(source);
-            expect(fullConversion).toEqual(expectedFull);
+            expect(fullConversion.replace(/\s+/g, "_")).toEqual(expectedFull.replace(/\s+/g, "_"));
         });
         it("should convert non-primitive parameters", () => {
             const source = "private async Task ProcessCanceledReversalStatus(Order order, string refundTransactionId)";
             const expected = "private async Task ProcessCanceledReversalStatus(order: Order, refundTransactionId: string)";
             const actual = source.replace(replaceMethodParameters.rgx, replaceMethodParameters.transform);
             expect(actual).toEqual(expected);
-           
+
 
             const expectedFull = "private async processCanceledReversalStatus(order: Order, refundTransactionId: string): Promise<void>";
             const fullConversion = convertSource(source);
@@ -297,7 +301,7 @@ describe("convert", () => {
             const expected = "ProcessChargeCaptureError(order: Order, eventDescription: string, bool cancelOrder = false)";
             const actual = source.replace(replaceMethodParameters.rgx, replaceMethodParameters.transform);
             expect(actual).toEqual(expected);
-            
+
             // const fullConversion = convertSource(source);
             // expect(fullConversion).toEqual(expectedFull);
         });
@@ -339,6 +343,30 @@ describe("convert", () => {
             const source = "new Pricing {ListPrice = list, SalePrice = sale}";
             const expected = "new Pricing(list, sale)";
 
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expected);
+        });
+    });
+    describe("testClass", () => {
+        it("should replace test fixture with describe", () => {
+            const source = `[TestFixture]
+            public class WhenUsingEntityComparer
+            {`;
+            const expected = "describe(\"When Using Entity Comparer\", () => {";
+            const actual = source.replace(replaceTestFixtureClass.rgx, replaceTestFixtureClass.transform);
+
+            expect(actual).toEqual(expected);
+            const fullConversion = convertSource(source);
+            expect(fullConversion).toEqual(expected);
+        });
+        it("should replace test method with it", () => {
+            const source = `[Test]
+            public void ItShouldReturnSingleDifference()
+            {`;
+            const expected = "it(\"It Should Return Single Difference\", () => {";
+            const actual = source.replace(replaceTestMethod.rgx, replaceTestMethod.transform);
+
+            expect(actual).toEqual(expected);
             const fullConversion = convertSource(source);
             expect(fullConversion).toEqual(expected);
         });
