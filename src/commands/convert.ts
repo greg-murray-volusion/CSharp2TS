@@ -36,8 +36,8 @@ export const replaceNullOperator: ReplacementFn = {
   transform: (match: string, p1: string, p2: string) => `get(${p1}, \"${p2.replace(/[?]/g, "")}\", null) `
 };
 export const replaceNumbers: Replacement = {
-  rgx: /(decimal|float|double|long|uint|int)([ ?])+/g,
-  transform: "number$2"
+  rgx: /([(]?)(decimal|float|double|long|uint|int)([)?][ ]?|[ ])+/g,
+  transform: "$1number$3"
 };
 export const replacePascalCaseProps: ReplacementFn = {
   rgx: /(\w*): (number|string|boolean|Date)/g,

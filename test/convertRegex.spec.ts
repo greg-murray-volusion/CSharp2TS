@@ -299,6 +299,18 @@ describe("convert", () => {
             const actual = source.replace(replaceNumbers.rgx, replaceNumbers.transform);
             assertExpected(source, actual, expected);
         });
+        it("should convert casting", () => {
+            const source = "return (decimal)ShippingMethod.ShippingCost.Amount;";
+            const expected = "return (number)ShippingMethod.ShippingCost.Amount;";
+            const actual = source.replace(replaceNumbers.rgx, replaceNumbers.transform);
+            assertExpected(source, actual, expected);
+        });
+        it("should convert casting with space", () => {
+            const source = "return (decimal) ShippingMethod.ShippingCost.Amount;";
+            const expected = "return (number) ShippingMethod.ShippingCost.Amount;";
+            const actual = source.replace(replaceNumbers.rgx, replaceNumbers.transform);
+            assertExpected(source, actual, expected);
+        });
     });
     describe("object initialization", () => {
         xit("should convert property init with constructor call", () => {
