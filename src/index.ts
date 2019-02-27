@@ -44,13 +44,11 @@ program
             customRules = customRulesRaw.split(",");
             if (customRules.length % 2 !== 0) {
                 // tslint:disable-next-line no-console
-                console.error("Custom rules must be in pairs");
+                console.error("Custom rules must be in pairs.  See --help");
                 program.outputHelp();
                 process.exit(1);
             }
         }
-        // tslint:disable-next-line no-console
-        console.log("custom", customRules);
         if (fileName !== undefined && fileName.length > 0) {
             convertFile(fileName, customRules);
         } else if (directory !== undefined && directory.length > 0) {

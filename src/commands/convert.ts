@@ -48,7 +48,7 @@ export const replacePascalCaseMethodsOrProps: ReplacementFn = {
   transform: (match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
 };
 export const replacePascalCaseStatements: ReplacementFn = {
-  rgx: /(\s*)+([A-Z]+[A-Za-z]+) = /g,
+  rgx: /(\s+)([A-Z]+[A-Za-z]+) = /g,
   transform: (match: string, p1: string, p2: string) => `${p1 !== undefined ? p1 : ''}this.${toCamelCase(p2)} = `
 };
 // cs2ts has already incorrectly converted method
@@ -71,7 +71,7 @@ export const replaceAsyncMethodMultiline: ReplacementFn = {
     `${p1} async ${toCamelCase(p3)}(${p4}${p5 ? " " + p5 : ""}): ${p2}`
 };
 export const replaceMethodParameters: Replacement = {
-  rgx: /(number|string|boolean|[A-Z]+[a-z0-9]*|\w*\<[^>]*\>\>?) (\w*)(,|\)| = \w*)/g,
+  rgx: /(number|string|boolean|[A-Z]\w+|\w+\<[^>]*\>\>?) (\w+)(,|\)| = \w*)/g,
   transform: "$2: $1$3"
 };
 // not using global replace as should be only 1 test fixture per file
@@ -129,6 +129,7 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/\.Substring\(/g, ".substring(")
     .replace(/\.AddRange\(/g, ".concat(")
     .replace(/DateTime.Now/g, "new Date()")
+    .replace(/Date \| string/g, "Date")
     .replace(/Assert.That/g, "expect")
     // LINQ methods
     .replace(/\.Any\(/g, ".some(")
@@ -136,6 +137,7 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/\.FirstOrDefault\(/g, ".find(")
     .replace(/\.Select\(/g, ".map(")
     .replace(/\.ToList\(\)/g, "")
+    .replace(/\.AddRange\(/g, ".concat(")
     // s.Replace("-", "") || s.StartsWith("T") -> s.replace("-", "") || s.startsWith("T")
     .replace(/(Replace|StartsWith|EndsWith)\(/g, toCamelCase)
     // c.ToLowerInvariant() || c.ToLower() -> c.toLowerCase() || c.toLowerCase()

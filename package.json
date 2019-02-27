@@ -107,7 +107,8 @@
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test",
         "convert": "node ./out/src/index.js convert",
-        "jest": "jest --env node --config ./jest.config.js"
+        "jest": "jest --env node --config ./jest.config.js",
+        "jest:watch": "jest --env node --config ./jest.config.js --watch"
     },
     "devDependencies": {
         "@types/glob": "^7.1.1",
