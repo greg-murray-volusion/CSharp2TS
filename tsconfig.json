@@ -9,14 +9,16 @@
         "sourceMap": true,
         "rootDir": ".",
         "strictNullChecks": true,
-        "noImplicitThis": true
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "noUnusedParameters": true,
     },
     "include": [
         "src/**/*.ts",
         "test/**/*.ts"
     ],
     "exclude": [
-        "node_modules",
+        "node_modules/**/*.ts",
         ".vscode-test",
         "gifExample.ts"
     ]

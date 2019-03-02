@@ -75,7 +75,7 @@ export function neasted(start: string, end: string, maxDepth: number, allowZeroD
     const bodyCharSource = `[^${start}${end}]`;
     const bodyChar = new RegExp(bodyCharSource);
     const zeroDepth = nonCap(oneOrMore(bodyChar));
-    const repeat = (s: string, n: number) => range(0, n).map(x => s).join("");
+    const repeat = (s: string, n: number) => range(0, n).map(_x => s).join("");
     const nDepth = (n: number) =>
         n == 0 ? zeroDepth :
             nonCap(new RegExp(repeat(start + bodyCharSource + "*", n - 1) + start +  bodyCharSource + "*" + end + repeat(bodyCharSource + "*" + end, n - 1)));

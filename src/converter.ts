@@ -37,7 +37,7 @@ const csConstructor = csFunction(parseConstructor, generateConstructor);
 const csCommentSummary = csFunction(parseXmlDocBlock, generateJsDoc);
 const csClass = csFunction(parseClass, generateClass);
 
-function csAttribute(code: string, config: ExtensionConfig): MatchResult {
+function csAttribute(code: string, _config: ExtensionConfig): MatchResult {
     var patt = /[ \t]*\[\S*\][ \t]*\r?\n/;
     var arr = patt.exec(code);
     if (arr == null) return null;

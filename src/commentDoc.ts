@@ -50,8 +50,8 @@ export function generateSimpleJsDoc(indent: string | undefined, content: string)
 
 /**
  * Generate a JS Doc
- * @param code 
- * @param value 
+ * @param code
+ * @param value
  */
 export function generateJsDoc(value: XmlDocBlock) {
     const isSimpleComment = (() => {
@@ -158,7 +158,7 @@ export function parseXmlDocBlock(code: string): ParseResult<XmlDocBlock> | null 
 
 
 const attribRegex = (captureGroups: boolean) => {
-    const capFunc = captureGroups ? cap : x => x;
+    const capFunc = captureGroups ? cap : (x: any) => x;
     const body = /[^"]*/
     return seq(regexs.spaceOptional, capFunc(regexs.identifier), regexs.spaceOptional, str("="), regexs.spaceOptional, str("\""), capFunc(body), str("\""));
 }
@@ -232,7 +232,7 @@ function parseDocStart(code: string): ParseResult<XmlDocContentLine> | null {
 
 const text = `
    	 /// <summary>
-    /// Obtiene todos los archivo ticket de un ticket, 
+    /// Obtiene todos los archivo ticket de un ticket,
     /// sin incluir su contenido <see cref="hola"/>
     /// Hola
     /// </summary>

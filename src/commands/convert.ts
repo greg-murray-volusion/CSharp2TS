@@ -20,7 +20,7 @@ export const defaultConfig: ExtensionConfig = {
   preserveModifiers: true
 };
 
-const toCamelCase = s => s && s.length > 0 ? s.substring(0, 1).toLowerCase() + s.substring(1) : "";
+const toCamelCase = (s: string) => s && s.length > 0 ? s.substring(0, 1).toLowerCase() + s.substring(1) : "";
 
 interface Replacement {
   rgx: RegExp;
@@ -33,7 +33,7 @@ interface ReplacementFn {
 
 export const replaceNullOperator: ReplacementFn = {
   rgx: /(\w*)[?]?\.((\w*\?\.\w*)+) /g,
-  transform: (match: string, p1: string, p2: string) => `get(${p1}, \"${p2.replace(/[?]/g, "")}\", null) `
+  transform: (_match: string, p1: string, p2: string) => `get(${p1}, \"${p2.replace(/[?]/g, "")}\", null) `
 };
 export const replaceNumbers: Replacement = {
   rgx: /([(]?)(decimal|float|double|long|uint|int)([)?][ ]?|[ ])+/g,
@@ -41,33 +41,33 @@ export const replaceNumbers: Replacement = {
 };
 export const replacePascalCaseProps: ReplacementFn = {
   rgx: /(\w*): (number|string|boolean|Date)/g,
-  transform: (match: string, p1: string, p2: string) => `${toCamelCase(p1)}: ${p2}`
+  transform: (_match: string, p1: string, p2: string) => `${toCamelCase(p1)}: ${p2}`
 };
 export const replacePascalCaseMethodsOrProps: ReplacementFn = {
   rgx: /(public|private|protected) (\w*)(\(|:)/g,
-  transform: (match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
+  transform: (_match: string, p1: string, p2: string, p3: string) => `${p1} ${toCamelCase(p2)}${p3}`
 };
 export const replacePascalCaseStatements: ReplacementFn = {
   rgx: /(\s+)([A-Z]+[A-Za-z]+) = /g,
-  transform: (match: string, p1: string, p2: string) => `${p1 !== undefined ? p1 : ''}this.${toCamelCase(p2)} = `
+  transform: (_match: string, p1: string, p2: string) => `${p1 !== undefined ? p1 : ''}this.${toCamelCase(p2)} = `
 };
 // cs2ts has already incorrectly converted method
 export const replaceStaticMethod: ReplacementFn = {
   rgx: /(number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\): static/g,
-  transform: (match: string, p1: string, p2: string, p3: string) => `public static ${toCamelCase(p2)}(${p3}): ${p1}`
+  transform: (_match: string, p1: string, p2: string, p3: string) => `public static ${toCamelCase(p2)}(${p3}): ${p1}`
 };
 export const replaceInterfaceMethod: ReplacementFn = {
   rgx: /(number|string|boolean|\w*\<[^>]*\>) (\w*)\((.*)\);/g,
-  transform: (match: string, p1: string, p2: string, p3: string) => `${toCamelCase(p2)}(${p3}): ${p1};`
+  transform: (_match: string, p1: string, p2: string, p3: string) => `${toCamelCase(p2)}(${p3}): ${p1};`
 };
 export const replaceAsyncMethod: ReplacementFn = {
   rgx: /(public|private|protected) async (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)\)/g,
-  transform: (match: string, p1: string, p2: string, p3: string, p4: string) =>
+  transform: (_match: string, p1: string, p2: string, p3: string, p4: string) =>
     `${p1} async ${toCamelCase(p3)}(${p4}): ${p2}`
 };
 export const replaceAsyncMethodMultiline: ReplacementFn = {
   rgx: /(public|private|protected) async (number|string|boolean|\w*\<[^>]*\>\>?) (\w*)\((.*)+(\s.*)?\)/g,
-  transform: (match: string, p1: string, p2: string, p3: string, p4: string, p5: string) =>
+  transform: (_match: string, p1: string, p2: string, p3: string, p4: string, p5: string) =>
     `${p1} async ${toCamelCase(p3)}(${p4}${p5 ? " " + p5 : ""}): ${p2}`
 };
 export const replaceMethodParameters: Replacement = {
@@ -77,15 +77,15 @@ export const replaceMethodParameters: Replacement = {
 // not using global replace as should be only 1 test fixture per file
 export const replaceTestFixtureClass: ReplacementFn = {
   rgx: /\[TestFixture\]\s+public class (\w*)\s+\{/,
-  transform: (match: string, p1: string) => `describe("${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}", () => {`
+  transform: (_match: string, p1: string) => `describe("${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}", () => {`
 };
 export const replaceTestMethod: ReplacementFn = {
   rgx: /\[Test\]\s+public void (\w*)\(\)\s+\{/g,
-  transform: (match: string, p1: string) => `it("${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}", () => {`
+  transform: (_match: string, p1: string) => `it("${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}", () => {`
 };
 export const replaceTemplateString: ReplacementFn = {
   rgx: /\$"(.*)"/g,
-  transform: (match: string, p1: string) => `\`${p1.replace(/{/g, "${")}\``
+  transform: (_match: string, p1: string) => `\`${p1.replace(/{/g, "${")}\``
 };
 // null: return; -> return null;
 export const replaceMistakeOnReturn: Replacement = {
@@ -128,7 +128,8 @@ export const postCleanup = (tsCode: string): string =>
     .replace(/\.Contains\(/g, ".includes(")
     .replace(/\.Substring\(/g, ".substring(")
     .replace(/\.AddRange\(/g, ".concat(")
-    .replace(/DateTime.Now/g, "new Date()")
+    .replace(/\.Add\(/g, ".push(")
+    .replace(/(DateTime.Now|DateTime.UtcNow)/g, "moment.utc().toDate()")
     .replace(/Date \| string/g, "Date")
     .replace(/Assert.That/g, "expect")
     // LINQ methods
