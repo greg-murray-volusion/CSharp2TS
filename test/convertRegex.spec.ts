@@ -17,7 +17,8 @@ import {
     replaceTestFixtureClass,
     replaceTestMethod,
     replacePascalCaseStatements,
-    replaceNumbers
+    replaceNumbers,
+    replaceTestCase
 } from "../src/commands/convert";
 import { cs2ts } from "../src/converter";
 
@@ -325,7 +326,7 @@ describe("convert", () => {
             const source = `[TestFixture]
             public class WhenUsingEntityComparer
             {`;
-            const expected = "describe(\"When Using Entity Comparer\", () => {";
+            const expected = "describe('When Using Entity Comparer', () => {";
             const actual = source.replace(replaceTestFixtureClass.rgx, replaceTestFixtureClass.transform);
             assertExpected(source, actual, expected);
         });
@@ -333,9 +334,23 @@ describe("convert", () => {
             const source = `[Test]
             public void ItShouldReturnSingleDifference()
             {`;
-            const expected = "it(\"It Should Return Single Difference\", () => {";
+            const expected = "it('It Should Return Single Difference', () => {";
             const actual = source.replace(replaceTestMethod.rgx, replaceTestMethod.transform);
             assertExpected(source, actual, expected);
+        });
+        it("should replace test case with commented out lines", () => {
+            const source = `[TestCase("ChargeMetadataUpdateSuccessful", Domain.Models.Order.PaymentEventType.ChargeMetadataUpdateSuccessful)]
+            [TestCase("ChargeMetadataUpdateError", Domain.Models.Order.PaymentEventType.ChargeMetadataUpdateError)]
+            public void ShouldMapPaymentEventType(string typeString, PaymentEventType type)`;
+            const expected = `// "ChargeMetadataUpdateSuccessful", Domain.Models.Order.PaymentEventType.ChargeMetadataUpdateSuccessful
+            // "ChargeMetadataUpdateError", Domain.Models.Order.PaymentEventType.ChargeMetadataUpdateError
+            public void ShouldMapPaymentEventType(string typeString, PaymentEventType type)`;
+            const expectedFull = `// "ChargeMetadataUpdateSuccessful", Domain.Models.Order.PaymentEventType.ChargeMetadataUpdateSuccessful
+            // "ChargeMetadataUpdateError", Domain.Models.Order.PaymentEventType.ChargeMetadataUpdateError
+            public void ShouldMapPaymentEventType(typeString: string, type: PaymentEventType)`;
+
+            const actual = source.replace(replaceTestCase.rgx, replaceTestCase.transform);
+            assertExpected(source, actual, expected, expectedFull);
         });
     });
 });

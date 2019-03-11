@@ -77,11 +77,15 @@ export const replaceMethodParameters: Replacement = {
 // not using global replace as should be only 1 test fixture per file
 export const replaceTestFixtureClass: ReplacementFn = {
   rgx: /\[TestFixture\]\s+public class (\w*)\s+\{/,
-  transform: (_match: string, p1: string) => `describe("${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}", () => {`
+  transform: (_match: string, p1: string) => `describe('${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}', () => {`
 };
 export const replaceTestMethod: ReplacementFn = {
   rgx: /\[Test\]\s+public void (\w*)\(\)\s+\{/g,
-  transform: (_match: string, p1: string) => `it("${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}", () => {`
+  transform: (_match: string, p1: string) => `it('${p1.replace(/(?<=[a-z])(?=[A-Z])/g, " ")}', () => {`
+};
+export const replaceTestCase: Replacement = {
+  rgx: /(?:\[TestCase\((.*)\)\])+/g,
+  transform: "// $1"
 };
 export const replaceTemplateString: ReplacementFn = {
   rgx: /\$"(.*)"/g,
@@ -200,7 +204,8 @@ export const convertSource = (csCode: string) => {
     : strippedNs;
   const testTransform = cleanedCsCode
     .replace(replaceTestFixtureClass.rgx, replaceTestFixtureClass.transform)
-    .replace(replaceTestMethod.rgx, replaceTestMethod.transform);
+    .replace(replaceTestMethod.rgx, replaceTestMethod.transform)
+    .replace(replaceTestCase.rgx, replaceTestCase.transform);
   const tsCode = cs2ts(testTransform, defaultConfig);
   return postCleanup(tsCode);
 }
